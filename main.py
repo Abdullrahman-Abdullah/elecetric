@@ -234,9 +234,8 @@ if os.path.isdir(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Serve product images from ./images
-images_dir = os.path.join(os.path.dirname(__file__), "images")
+images_dir = "/tmp/images"  # نظام ملفات مؤقت للقراءة والكتابة
 os.makedirs(images_dir, exist_ok=True)
-app.mount("/images", StaticFiles(directory=images_dir), name="images")
 
 
 
@@ -1101,3 +1100,4 @@ async def get_vendor_profile():
         "is_active": True
 
     }
+
