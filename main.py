@@ -227,6 +227,89 @@ async def login_with_qr(vendor_id: str, qr_token: str = Body(...)):
     }
 
 
+
+# Serve frontend static files from the `static` directory
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# Serve product images from ./images
+images_dir = os.path.join(os.path.dirname(__file__), "images")
+os.makedirs(images_dir, exist_ok=True)
+app.mount("/images", StaticFiles(directory=images_dir), name="images")
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    """Return the frontend index.html when visiting the root path."""
+    # Prefer a project-root `index.html` if the user attached a custom UI there.
+    repo_root_index = os.path.join(os.path.dirname(__file__), "index.html")
+    static_index = os.path.join(static_dir, "index.html") if static_dir else None
+
+    if os.path.isfile(repo_root_index):
+        return FileResponse(repo_root_index)
+
+    if static_index and os.path.isfile(static_index):
+        return FileResponse(static_index)
+
+    return {"detail": "Frontend not found"}
+
+@app.get("/seller", include_in_schema=False)
+async def root():
+    """Return the frontend index.html when visiting the root path."""
+    # Prefer a project-root `index.html` if the user attached a custom UI there.
+    repo_root_index = os.path.join(os.path.dirname(__file__), "seller.html")
+    static_index = os.path.join(static_dir, "seller.html") if static_dir else None
+
+    if os.path.isfile(repo_root_index):
+        return FileResponse(repo_root_index)
+
+    if static_index and os.path.isfile(static_index):
+        return FileResponse(static_index)
+
+    return {"detail": "Frontend not found"}
+
+
+
+# في main.py أضف هذه الوظيفة
+from fastapi.responses import Response
+import base64
+
+# إنشاء صورة افتراضية
+DEFAULT_IMAGE_SVG = """<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="60" height="60" fill="#E5E5E5"/>
+<path d="M30 20C33.3137 20 36 17.3137 36 14C36 10.6863 33.3137 8 30 8C26.6863 8 24 10.6863 24 14C24 17.3137 26.6863 20 30 20Z" fill="#B2B2B2"/>
+<path d="M38 34L22 34C20 34 18 32 18 30L18 26C18 24 20 22 22 22L38 22C40 22 42 24 42 26L42 30C42 32 40 34 38 34Z" fill="#B2B2B2"/>
+</svg>"""
+
+@app.get("/images/default-image.png")
+async def get_default_image():
+    """إرجاع صورة افتراضية للمنتجات بدون صور"""
+    svg_bytes = DEFAULT_IMAGE_SVG.encode('utf-8')
+    return Response(content=svg_bytes, media_type="image/svg+xml")
+
+@app.get("/images/{filename}")
+async def get_product_image(filename: str):
+    """إرجاع صورة المنتج أو الصورة الافتراضية"""
+    image_path = os.path.join(images_dir, filename)
+    
+    if not os.path.exists(image_path):
+        # إرجاع صورة افتراضية إذا لم توجد الصورة
+        svg_bytes = DEFAULT_IMAGE_SVG.encode('utf-8')
+        return Response(content=svg_bytes, media_type="image/svg+xml")
+    
+    # تحديد نوع الملف
+    if filename.endswith('.png'):
+        media_type = "image/png"
+    elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
+        media_type = "image/jpeg"
+    elif filename.endswith('.gif'):
+        media_type = "image/gif"
+    else:
+        media_type = "image/png"
+    
+    return FileResponse(image_path, media_type=media_type)
+
 # إصلاح دالة create_product_flexible
 @app.post("/products", response_description="إضافة منتج جديد (مرن)")
 async def create_product_flexible(payload: dict = Body(...)):
@@ -1043,7 +1126,4 @@ async def get_vendor_profile():
         "role": "vendor",
         "created_at": "2024-01-01T00:00:00Z",
         "is_active": True
-
     }
-
-
