@@ -229,18 +229,9 @@ async def login_with_qr(vendor_id: str, qr_token: str = Body(...)):
 
 
 # Serve frontend static files from the `static` directory
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.isdir(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Serve product images from ./images
-images_dir = tempfile.mkdtemp(prefix="product_images_")
-print(f"✅ Images directory created at: {images_dir}")
 
-# تأكد من وجود المجلد
-if not os.path.exists(images_dir):
-    print(f"⚠️ Warning: Failed to create images directory")
-app.mount("/images", StaticFiles(directory=images_dir), name="images")
+
 
 
 @app.get("/", include_in_schema=False)
@@ -1131,4 +1122,5 @@ async def get_vendor_profile():
         "created_at": "2024-01-01T00:00:00Z",
         "is_active": True
     }
+
 
