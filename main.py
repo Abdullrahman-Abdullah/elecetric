@@ -239,35 +239,8 @@ os.makedirs(images_dir, exist_ok=True)
 app.mount("/images", StaticFiles(directory=images_dir), name="images")
 
 
-@app.get("/", include_in_schema=False)
-async def root():
-    """Return the frontend index.html when visiting the root path."""
-    # Prefer a project-root `index.html` if the user attached a custom UI there.
-    repo_root_index = os.path.join(os.path.dirname(__file__), "index.html")
-    static_index = os.path.join(static_dir, "index.html") if static_dir else None
 
-    if os.path.isfile(repo_root_index):
-        return FileResponse(repo_root_index)
 
-    if static_index and os.path.isfile(static_index):
-        return FileResponse(static_index)
-
-    return {"detail": "Frontend not found"}
-
-@app.get("/seller", include_in_schema=False)
-async def root():
-    """Return the frontend index.html when visiting the root path."""
-    # Prefer a project-root `index.html` if the user attached a custom UI there.
-    repo_root_index = os.path.join(os.path.dirname(__file__), "seller.html")
-    static_index = os.path.join(static_dir, "seller.html") if static_dir else None
-
-    if os.path.isfile(repo_root_index):
-        return FileResponse(repo_root_index)
-
-    if static_index and os.path.isfile(static_index):
-        return FileResponse(static_index)
-
-    return {"detail": "Frontend not found"}
 
 
 
@@ -1126,4 +1099,5 @@ async def get_vendor_profile():
         "role": "vendor",
         "created_at": "2024-01-01T00:00:00Z",
         "is_active": True
+
     }
