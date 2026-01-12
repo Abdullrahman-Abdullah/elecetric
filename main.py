@@ -234,8 +234,12 @@ if os.path.isdir(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Serve product images from ./images
-images_dir = os.path.join(os.path.dirname(__file__), "images")
-os.makedirs(images_dir, exist_ok=True)
+images_dir = tempfile.mkdtemp(prefix="product_images_")
+print(f"✅ Images directory created at: {images_dir}")
+
+# تأكد من وجود المجلد
+if not os.path.exists(images_dir):
+    print(f"⚠️ Warning: Failed to create images directory")
 app.mount("/images", StaticFiles(directory=images_dir), name="images")
 
 
@@ -1127,3 +1131,4 @@ async def get_vendor_profile():
         "created_at": "2024-01-01T00:00:00Z",
         "is_active": True
     }
+
